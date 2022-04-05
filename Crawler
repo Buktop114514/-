@@ -1,0 +1,23 @@
+import requests
+from lxml import etree
+import pandas as pd
+import openpyxl
+max_page  = input("请输入所需要爬取的页码数")   #爬取页面数量
+all_title = []   
+all_time  = []   
+headers = {'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/92.0.4515.131 Safari/537.36'}  
+for page in range(2350,max_page+1):
+    #获取网页源代码
+    print('crawling the page is {}'.format(page))
+    url= f'http://guba.eastmoney.com/list,zssh000001,f_{page}.html'
+    response  = requests.get(url, headers=headers)
+    #解析
+    root = etree.HTML(response.text)
+    title = root.xpath("//div[contains(@class,'articleh normal_post')]//span[@class='l3 a3']//a//@title")#已改进，单纯无法获得
+    time = root.xpath("//div[contains(@class,'articleh normal_post')]//span[@class='l5 a5']//text()")
+    all_title.append(title)  
+    all_time.append(time)
+data_raw = pd.DataFrame()
+data_raw['title'] = all_title
+data_raw['time'] = all_time
+data_raw.to_excel('.//data_raw_total.xlsx', index=False)
